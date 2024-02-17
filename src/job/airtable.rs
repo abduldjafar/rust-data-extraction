@@ -88,7 +88,7 @@ pub async fn execute(
     let config: Value = serde_yaml::from_str(&contents)?;
     let airtable_url: &str = &config[format!("url_{}", year)].as_str().ok_or("invalid url")?;
     let job_config_path: &str = &config["job_config_path"].as_str().ok_or("invalid_path")?;
-    let api_endpoint_launch: &str = &config[format!("api_endpoint_{}", at_type)]
+    let api_endpoint: &str = &config[format!("api_endpoint_{}", at_type)]
         [format!("{}", table)]
         .as_str()
         .ok_or("endpoint not valid")?;
@@ -101,7 +101,7 @@ pub async fn execute(
     )?;
     let mut map = columns.clone();
 
-    airtable::extraction(table, airtable_url, api_endpoint_launch, auth_token, year).await?;
+    airtable::extraction(table, airtable_url, api_endpoint, auth_token, year).await?;
 
     let mut file = std::fs::File::open(format!("{}_output_{}.json", table, year))?;
     let df: DataFrame = JsonLineReader::new(&mut file).finish()?.unnest(["fields"])?;
