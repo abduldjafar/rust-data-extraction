@@ -16,6 +16,8 @@ uuid = { version = "1.7.0",features = ["v4"]}
 polars = { version = "0.37.0", features = ["json","csv","lazy"] }
 polars-sql = "0.37.0"
 serde_yaml = "0.9.31"
+clap = { version = "4.3.12", features = ["derive"] }
+
 
 
 
