@@ -1,0 +1,126 @@
+{
+    "id": {
+      "new": "id",
+      "type": "str"
+    },
+    "createdTime": {
+      "new": "created_at",
+      "type": "str"
+    },
+    "Child SKU": {
+      "new": "child_sku",
+      "type": "list"
+    },
+    "Winner": {
+      "new": "winners",
+      "type": "list"
+    },
+    "Qty (SG and MY Online)": {
+      "new": "qty_online",
+      "type": "list"
+    },
+    "Qty (313)": {
+      "new": "qty_somerset",
+      "type": "str"
+    },
+    "Qty (MY Retail)": {
+      "new": "qty_my_retail",
+      "type": "str"
+    },
+    "Qty (JEM)": {
+      "new": "qty_jem",
+      "type": "str"
+    },
+    "Qty (FUNAN)": {
+      "new": "qty_funan",
+      "type": "str"
+    },
+    "Qty (HK Pop-Up)": {
+      "new": "qty_hk_popup",
+      "type": "str"
+    },
+    "Final Launch Label": {
+      "new": "final_launch_label_id",
+      "type": "list"
+    },
+    "Actual Shipment Date": {
+      "new": "actual_shipment_date",
+      "type": "list"
+    },
+    "Order Number": {
+      "new": "order_number",
+      "type": "list"
+    },
+    "Order Name": {
+      "new": "order_name",
+      "type": "list"
+    },
+    "Final Launch Label PO": {
+      "new": "final_launch_label_po",
+      "type": "str"
+    },
+    "Qty (ECOM SG)": {
+      "new": "qty_ecom_sg",
+      "type": "str"
+    },
+    "Qty (ECOM MY)": {
+      "new": "qty_ecom_my",
+      "type": "str"
+    },
+    "Qty (ECOM HK)": {
+      "new": "qty_ecom_hk",
+      "type": "str"
+    },
+    "Qty (ECOM ROW)": {
+      "new": "qty_ecom_row",
+      "type": "str"
+    },
+    "Qty (VIVO)": {
+      "new": "qty_vivo",
+      "type": "str"
+    },
+    "Qty (ION)": {
+      "new": "qty_ion",
+      "type": "str"
+    },
+    "Qty (KH-A1)": {
+      "new": "qty_kh_a1",
+      "type": "str"
+    },
+    "Qty (KH-A2)": {
+      "new": "qty_kh_a2",
+      "type": "str"
+    },
+    "Qty (KH-Mega271)": {
+      "new": "qty_kh_mega271",
+      "type": "str"
+    },
+    "Qty (ID)": {
+      "new": "qty_id",
+      "type": "str"
+    },
+    "Qty (SG Mkt)": {
+      "new": "qty_sg_mkt",
+      "type": "str"
+    },
+    "Qty (MY Mkt)": {
+      "new": "qty_my_mkt",
+      "type": "str"
+    },
+    "Qty (ID Mkt)": {
+      "new": "qty_id_mkt",
+      "type": "str"
+    },
+    "Qty (WWP)": {
+      "new": "qty_wwp",
+      "type": "str"
+    },
+    "SG OFL": {
+      "new": "sg_offline",
+      "type": "str"
+    },
+    "Qty (HK Retail)": {
+      "new": "qty_hk_retail",
+      "type": "str"
+    }
+  }

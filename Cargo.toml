@@ -1,0 +1,21 @@
+[package]
+name = "rust-extraction"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+reqwest = { version = "0.11.24", features = ["json", "blocking", "cookies"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1.0" 
+futures = "0.3"
+tokio-macros = "~2.2.0"
+tokio = { version = "1", features = ["full"] }
+uuid = { version = "1.7.0",features = ["v4"]}
+polars = { version = "0.37.0", features = ["json","csv","lazy"] }
+polars-sql = "0.37.0"
+serde_yaml = "0.9.31"
+
+
+

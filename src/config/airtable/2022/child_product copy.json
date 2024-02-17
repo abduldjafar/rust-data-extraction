@@ -1,0 +1,119 @@
+{
+    "id": {
+      "new": "id",
+      "type": "str"
+    },
+    "created_at": {
+      "new": "created_at",
+      "type": "str"
+    },
+    "Bust (Inch)": {
+      "new": "bust_inch",
+      "type": "str"
+    },
+    "Front Rise (Inch)": {
+      "new": "front_rise_inch",
+      "type": "str"
+    },
+    "Highest Length (Inch)": {
+      "new": "highest_length",
+      "type": "str"
+    },
+    "Hips (Inch)": {
+      "new": "hips_inch",
+      "type": "str"
+    },
+    "Inseam (Inch)": {
+      "new": "inseam_inch",
+      "type": "str"
+    },
+    "Length (Inch)": {
+      "new": "length_inch",
+      "type": "str"
+    },
+    "Lowest Length (Inch)": {
+      "new": "lowest_length",
+      "type": "str"
+    },
+    "Shoulder Width (Inch)": {
+      "new": "shoulder_width_inch",
+      "type": "str"
+    },
+    "Size": {
+      "new": "size",
+      "type": "list"
+    },
+    "Sleeve Length (Inch)": {
+      "new": "sleeve_lenght_inch",
+      "type": "str"
+    },
+    "Thigh Width (Inch)": {
+      "new": "thigh_width_inch",
+      "type": "str"
+    },
+    "Waist (Inch)": {
+      "new": "waist_inch",
+      "type": "str"
+    },
+    "Parent-Colour SKU": {
+      "new": "parent_colour_sku",
+      "type": "list"
+    },
+    "Supplier": {
+      "new": "supplier",
+      "type": "list"
+    },
+    "Est. Landed Cost": {
+      "new": "estimated_landed_cost",
+      "type": "list"
+    },
+    "Shoulder Strap Drop (Cm)": {
+      "new": "shoulder_strap_drop_cm",
+      "type": "str"
+    },
+    "Side Seam Length (Cm)": {
+      "new": "side_seam_length_cm",
+      "type": "str"
+    },
+    "Shoe Size (Cm)": {
+      "new": "shoe_size_cm",
+      "type": "str"
+    },
+    "Platform Height (Cm)": {
+      "new": "platform_height_cm",
+      "type": "str"
+    },
+    "Highest Point of Hem (Cm)": {
+      "new": "highest_point_of_hem_cm",
+      "type": "str"
+    },
+    "Leg Opening (Cm)": {
+      "new": "leg_opening_cm",
+      "type": "str"
+    },
+    "Foot Circumference (Cm)": {
+      "new": "foot_circumference_cm",
+      "type": "str"
+    },
+    "Bicep Width (Inch)": {
+      "new": "bicep_width_inch",
+      "type": "str"
+    },
+    "Depth (Cm)": {
+      "new": "depth_cm",
+      "type": "str"
+    },
+    "Handle Drop (Cm)": {
+      "new": "handle_drop_cm",
+      "type": "str"
+    },
+    "Head Circumference (Cm)": {
+      "new": "head_circumference_cm",
+      "type": "str"
+    },
+    "Insole Length (Cm)": {
+      "new": "insole_length_cm",
+      "type": "str"
+    }
+  }
+  

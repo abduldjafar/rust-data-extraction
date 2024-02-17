@@ -1,0 +1,27 @@
+{
+    "id": {
+      "new": "id",
+      "type": "str"
+    },
+    "created_at": {
+      "new": "created_at",
+      "type": "str"
+    },
+    "Bust (Inch)": {
+      "new": "bust_inch",
+      "type": "str"
+    },
+    "Front Rise (Inch)": {
+        "new": "front_rise_inch",
+        "type": "str"
+      },
+    "Highest Length (Inch)": {
+        "new": "highest_length",
+        "type": "str"
+    },
+    "Hips (Inch)": {
+      "new": "hips_inch",
+      "type": "str"
+    }
+  }
+  
