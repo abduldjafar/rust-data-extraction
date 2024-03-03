@@ -3,6 +3,9 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 use std::env;
+use std::fs::{self};
+
+
 
 pub fn at_filtered_columns(
     table: &str,
@@ -21,6 +24,16 @@ pub fn at_filtered_columns(
     Ok(map)
 }
 
-pub fn get_config() -> String {
-    env::var("PIPELINE_CONFIG").expect("$PIPELINE_CONFIG is not set")
+pub  async fn get_config() -> Result<Value,serde_yaml::Error> {
+   let file_path =  env::var("PIPELINE_CONFIG").expect("$PIPELINE_CONFIG is not set");
+    let mut file = fs::File::open(file_path).expect("file should open read only");
+
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)
+        .expect("Unable to read file");
+
+    let config: Result<Value, serde_yaml::Error> = serde_yaml::from_str(&contents);
+
+    config
+
 }

@@ -1,6 +1,8 @@
 mod job;
 use std::env;
 use clap::Parser;
+use chrono::{Local, NaiveDate};
+
 
 
 #[derive(Parser, Debug)]
@@ -13,12 +15,12 @@ struct Args {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let current_date = Local::now().date_naive().to_string();
     let args = Args::parse();
     env::set_var("PIPELINE_CONFIG",args.pipeline_config);
+    env::set_var("CURRENT_DATE",current_date);
     //job::airtable::run().await?;
-    job::impact::fetch_sync("2024-01-31").await?;
+    job::impact::run().await?;
        
     Ok(())
 }
-
-//"/Users/abdulharisdjafar/Documents/office/poc/rust-extraction/config.yml"
