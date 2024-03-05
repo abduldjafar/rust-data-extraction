@@ -20,7 +20,7 @@ clap = { version = "4.3.12", features = ["derive"] }
 chrono = "0.4.28"
 google-cloud-bigquery = "0.7.0"
 google-cloud-gax = "0.17.0"
-
+csv = "1.1"
 
 
 
