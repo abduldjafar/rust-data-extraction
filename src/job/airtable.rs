@@ -6,7 +6,6 @@ use tokio::time::timeout;
 use polars::lazy::dsl::{col, lit, Expr};
 use polars::prelude::*;
 use serde_json::{self, Value};
-use serde_yaml;
 use reqwest;
 
 use crate::job::{airtable, utility, config::get_config};
@@ -78,14 +77,8 @@ pub async fn execute(
     at_type: &str,
     year: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let file_path = get_config();
-    let mut file = fs::File::open(file_path).expect("file should open read only");
-
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)
-        .expect("Unable to read file");
-
-    let config: Value = serde_yaml::from_str(&contents)?;
+    let config = get_config().await?;
+    
     let airtable_url: &str = &config[format!("url_{}", year)].as_str().ok_or("invalid url")?;
     let job_config_path: &str = &config["job_config_path"].as_str().ok_or("invalid_path")?;
     let api_endpoint: &str = &config[format!("api_endpoint_{}", at_type)]
