@@ -6,12 +6,15 @@ use google_cloud_bigquery::{
 };
 use csv;
 use tokio::time::timeout;
-
 use crate::job::config::{setup_emarsys_columns, setup_emarsys_sources_tables};
+
 
 pub async fn extraction(table_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     let sources_tables = setup_emarsys_sources_tables();
     let datalake_emarsys = setup_emarsys_columns();
+
+    let columns = datalake_emarsys.get(table_name).unwrap();
+    let source_table = sources_tables.get(table_name).unwrap();
 
     let request = QueryRequest {
         query: format!(
@@ -21,8 +24,7 @@ pub async fn extraction(table_name: &str) -> Result<(), Box<dyn std::error::Erro
             FROM 
                 {}
             "#,
-            datalake_emarsys.get(table_name).unwrap(),
-            sources_tables.get(table_name).unwrap()
+            *columns,source_table
         ),
         ..Default::default()
     };
@@ -36,27 +38,33 @@ pub async fn extraction(table_name: &str) -> Result<(), Box<dyn std::error::Erro
 
     let mut writer = csv::Writer::from_path(format!("{}.csv", table_name))?;
 
-    while let Some(row) = iter.next().await? {
-        let vect_col: Vec<_> = datalake_emarsys
+    let vect_col: Vec<_> = datalake_emarsys
             .get(table_name)
             .unwrap()
             .split(",")
             .into_iter()
             .collect();
-        let col_size = vect_col.len();
+    let col_size = vect_col.len();
 
-        let result: Vec<String> = (0..=col_size - 1)
-            .map(|x| format!("{}", row.column::<Option<String>>(x).unwrap().unwrap()))
+    while let Some(row) = iter.next().await? {
+        let result: Vec<String> = (0..col_size)
+            .map(|x| {
+                match row.column::<Option<String>>(x) {
+                    Ok(Some(data)) => data,
+                    Ok(None) => "None".to_string(),
+                    Err(_) => "None".to_string(),
+                }
+            })
             .collect();
         writer.write_record(&result)?;
-
     }
+
     writer.flush()?;
     Ok(())
 }
 
 pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let sources_tables: Vec<&str> = setup_emarsys_columns().keys().copied().collect();
+    let sources_tables: Vec<&str> = setup_emarsys_sources_tables().keys().copied().collect();
 
     let handles: Vec<_> = sources_tables
         .into_iter()
