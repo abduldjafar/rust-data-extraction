@@ -20,7 +20,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env::set_var("PIPELINE_CONFIG",args.pipeline_config);
     env::set_var("CURRENT_DATE",current_date);
     //job::airtable::run().await?;
-    job::impact::run().await?;
+    //job::impact::run().await?;
+    job::emarsys_bq::extraction().await?;
        
     Ok(())
 }
