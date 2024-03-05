@@ -8,7 +8,6 @@ use csv;
 use tokio::time::timeout;
 use crate::job::config::{setup_emarsys_columns, setup_emarsys_sources_tables};
 
-
 pub async fn extraction(table_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     let sources_tables = setup_emarsys_sources_tables();
     let datalake_emarsys = setup_emarsys_columns();
@@ -24,7 +23,7 @@ pub async fn extraction(table_name: &str) -> Result<(), Box<dyn std::error::Erro
             FROM 
                 {}
             "#,
-            *columns,source_table
+            *columns, source_table
         ),
         ..Default::default()
     };
@@ -39,21 +38,18 @@ pub async fn extraction(table_name: &str) -> Result<(), Box<dyn std::error::Erro
     let mut writer = csv::Writer::from_path(format!("{}.csv", table_name))?;
 
     let vect_col: Vec<_> = datalake_emarsys
-            .get(table_name)
-            .unwrap()
-            .split(",")
-            .into_iter()
-            .collect();
+        .get(table_name)
+        .unwrap()
+        .split(",")
+        .collect();
     let col_size = vect_col.len();
 
     while let Some(row) = iter.next().await? {
         let result: Vec<String> = (0..col_size)
-            .map(|x| {
-                match row.column::<Option<String>>(x) {
-                    Ok(Some(data)) => data,
-                    Ok(None) => "None".to_string(),
-                    Err(_) => "None".to_string(),
-                }
+            .map(|x| match row.column::<Option<String>>(x) {
+                Ok(Some(data)) => data,
+                Ok(None) => "None".to_string(),
+                Err(_) => "None".to_string(),
             })
             .collect();
         writer.write_record(&result)?;
