@@ -1,0 +1,28 @@
+name: Build Rust Binary
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up Rust
+      uses: actions/setup-rust@v2
+      with:
+        rust-version: stable
+
+    - name: Build Binary
+      run: cargo build --release
+
+    - name: Archive Binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: my-binary
+        path: target/release/rust-extraction
