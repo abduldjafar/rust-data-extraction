@@ -1,9 +1,9 @@
 mod job;
 
-use std::{env,time::Duration};
+use std::env;
 use clap::Parser;
 use chrono::Local;
-use tokio::time::timeout;
+use tokio::try_join;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -15,35 +15,25 @@ struct Args {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let current_date = Local::now().date_naive().to_string();
+    // Parse command-line arguments
     let args = Args::parse();
+
+    // Set environment variables
+    let current_date = Local::now().date_naive().to_string();
     env::set_var("PIPELINE_CONFIG", args.pipeline_config);
     env::set_var("CURRENT_DATE", current_date);
 
-    let mut jobs:Vec<tokio::task::JoinHandle<()>> = Vec::new();
+    // Run tasks in parallel using async closures
+    let result = try_join!(
+        job::airtable::run(),
+        job::impact::run(),
+        job::emarsys_bq::run()
+    );
 
-    jobs.push(tokio::spawn(async move {
-        if let Err(err) = timeout(Duration::from_secs(3600), job::airtable::run()).await {
-            eprintln!("Error executing task: {}", err);
-        }
-    }));
-
-    jobs.push(tokio::spawn(async move {
-        if let Err(err) = timeout(Duration::from_secs(3600), job::impact::run()).await {
-            eprintln!("Error executing task: {}", err);
-        }
-    }));
-
-
-    jobs.push(tokio::spawn(async move {
-        if let Err(err) = timeout(Duration::from_secs(3600), job::emarsys_bq::run()).await {
-            eprintln!("Error executing task: {}", err);
-        }
-    }));
-    
-
-    for job in jobs {
-        job.await.expect("Failed to join task");
+    // Handle the result of parallel tasks
+    match result {
+        Ok(_) => println!("All tasks completed successfully"),
+        Err(e) => eprintln!("Error in one of the tasks: {}", e),
     }
 
     Ok(())
