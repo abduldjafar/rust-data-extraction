@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use std::fs::{self, File};
+use std::fs::File;
 use std::io::prelude::*;
 use std::time::Duration;
 use tokio::time::timeout;
