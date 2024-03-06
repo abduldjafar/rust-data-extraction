@@ -10,8 +10,9 @@ use reqwest;
 use serde_json;
 use tokio::time::timeout;
 use std::collections::HashMap;
-
 use super::config::get_config;
+use tracing::{error, info};
+
 
 async fn fetch_sync(
     execution_date: &str,
@@ -70,6 +71,7 @@ async fn fetch_sync(
     Ok(json)
 }
 
+#[tracing::instrument]
 async fn extraction(
     execution_date: &str,
     api_url: &str,
@@ -87,19 +89,23 @@ async fn extraction(
         auth_sid, 
         auth_token
     ).await?;
-    
+
     let mut file = File::create(format!("{}_{}_impact.json", report, auth_sid))?;
 
     let datas = data.get("Records").unwrap().as_array().unwrap();
     for d in datas {
         
         serde_json::to_writer(&mut file, &d)?;
-        writeln!(&mut file)?; // Add a newline after each value
+        match writeln!(&mut file){
+            Ok(()) => continue,
+            Err(err) => error!("error write json data into {}_{}_impact.json\nMessage: {:?}",report, auth_sid, err)
+        } // Add a newline after each value
     }
 
     Ok(())
 }
 
+#[tracing::instrument]
 async fn execute(
     execution_date: &str,
     api_url: &str,
@@ -276,7 +282,10 @@ async fn execute(
 
 
     let mut file = std::fs::File::create(format!("result_{}_{}_impact.csv", report, auth_sid))?;
-    CsvWriter::new(&mut file).finish(&mut sql_df).unwrap();
+    match CsvWriter::new(&mut file).finish(&mut sql_df){
+        Ok(()) => info!("result_{}_{}_impact.csv", report, auth_sid),
+        Err(e) => error!("error writing result_{}_{}_impact.csv\n Message:{:?}",report,auth_sid,e),
+    }
 
     Ok(())
 }

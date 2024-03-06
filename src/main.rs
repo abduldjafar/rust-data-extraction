@@ -15,6 +15,10 @@ struct Args {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+
+    // install global collector configured based on RUST_LOG env var.
+    tracing_subscriber::fmt::init();
+    
     // Parse command-line arguments
     let args = Args::parse();
 
