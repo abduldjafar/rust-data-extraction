@@ -7,7 +7,10 @@ use google_cloud_bigquery::{
 use csv;
 use tokio::time::timeout;
 use crate::job::config::{setup_emarsys_columns, setup_emarsys_sources_tables};
+use tracing::{error, info};
 
+
+#[tracing::instrument(err)]
 pub async fn extraction(table_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     let sources_tables = setup_emarsys_sources_tables();
     let datalake_emarsys = setup_emarsys_columns();
@@ -29,7 +32,7 @@ pub async fn extraction(table_name: &str) -> Result<(), Box<dyn std::error::Erro
     };
 
     let (config, project_id) = ClientConfig::new_with_auth().await?;
-    let client = Client::new(config).await?;
+    let client =  Client::new(config).await?;
 
     let mut iter: google_cloud_bigquery::query::Iterator<Row> = client
         .query(&project_id.unwrap(), request)
@@ -52,13 +55,23 @@ pub async fn extraction(table_name: &str) -> Result<(), Box<dyn std::error::Erro
                 Err(_) => "None".to_string(),
             })
             .collect();
-        writer.write_record(&result)?;
+        ;
+
+        match writer.write_record(&result){
+            Ok(()) => (),
+            Err(err) => error!("error write row into table :{}\nMessage: {:?}",table_name,err)
+        }
     }
 
-    writer.flush()?;
+    match writer.flush(){
+        Ok(()) => info!("success write table  : {}", table_name),
+        Err(err) => error!("error write into {} {:?}",table_name,err)
+    }
+    
     Ok(())
 }
 
+#[tracing::instrument(err)]
 pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
     let sources_tables: Vec<&str> = setup_emarsys_sources_tables().keys().copied().collect();
 

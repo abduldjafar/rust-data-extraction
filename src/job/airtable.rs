@@ -7,6 +7,8 @@ use polars::lazy::dsl::{col, lit, Expr};
 use polars::prelude::*;
 use serde_json::{self, Value};
 use reqwest;
+use tracing::{error, info};
+
 
 use crate::job::{airtable, utility, config::get_config};
 
@@ -17,6 +19,7 @@ struct JobDetail {
     year: String,
 }
 
+#[tracing::instrument(err)]
 pub async fn fetch_sync(
     api_url: &str,
     api_endpoint: &str,
@@ -37,6 +40,7 @@ pub async fn fetch_sync(
     Ok(json)
 }
 
+#[tracing::instrument(err)]
 pub async fn extraction(
     table: &str,
     api_url: &str,
@@ -56,7 +60,10 @@ pub async fn extraction(
         let data = response.get("records").unwrap().as_array().unwrap();
         for d in data {
             serde_json::to_writer(&mut file, &d)?;
-            writeln!(&mut file)?; // Add a newline after each value
+            match writeln!(&mut file){
+                Ok(()) => continue,
+                Err(err) => error!("error write to json for {}\nMessage: {:?}",table ,err)
+            } 
         }
 
         offset_clone = match new_responses.get("offset") {
@@ -72,6 +79,7 @@ pub async fn extraction(
     Ok(())
 }
 
+#[tracing::instrument(err)]
 pub async fn execute(
     table: &str,
     at_type: &str,
@@ -140,11 +148,15 @@ pub async fn execute(
     let final_df = new_df.with_columns(new_columns).select(final_columns);
 
     let mut file = std::fs::File::create(format!("result_{}_{}.csv", table, year))?;
-    CsvWriter::new(&mut file).finish(&mut final_df.collect()?).unwrap();
+    match CsvWriter::new(&mut file).finish(&mut final_df.collect()?){
+        Ok(_) => info!("success write table {}",table),
+        Err(e) => error!("error writing table {}\nMessage: {:?}",table,e)
+    }
 
     Ok(())
 }
 
+#[tracing::instrument(err)]
 pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
     let years = vec!["2024".to_string(), "2023".to_string(), "2022".to_string()];
 

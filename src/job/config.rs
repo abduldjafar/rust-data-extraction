@@ -6,7 +6,6 @@ use std::env;
 use std::fs::{self};
 
 
-
 pub fn at_filtered_columns(
     table: &str,
     job_name: &str,
@@ -24,6 +23,7 @@ pub fn at_filtered_columns(
     Ok(map)
 }
 
+#[tracing::instrument(err)]
 pub  async fn get_config() -> Result<Value,serde_yaml::Error> {
    let file_path =  env::var("PIPELINE_CONFIG").expect("$PIPELINE_CONFIG is not set");
     let mut file = fs::File::open(file_path).expect("file should open read only");
@@ -69,6 +69,7 @@ pub fn  setup_emarsys_sources_tables() ->  HashMap<&'static str, String>{
 
     result
 }
+
 
 pub fn setup_emarsys_columns() -> HashMap<&'static str, &'static str>{
 
