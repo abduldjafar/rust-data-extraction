@@ -11,7 +11,7 @@ use serde_json;
 use tokio::time::timeout;
 use std::collections::HashMap;
 use super::config::get_config;
-use tracing::{error, info};
+use tracing::{ error, info};
 
 
 async fn fetch_sync(
@@ -71,7 +71,7 @@ async fn fetch_sync(
     Ok(json)
 }
 
-#[tracing::instrument]
+#[tracing::instrument(skip_all)]
 async fn extraction(
     execution_date: &str,
     api_url: &str,
@@ -105,7 +105,7 @@ async fn extraction(
     Ok(())
 }
 
-#[tracing::instrument]
+#[tracing::instrument(skip_all)]
 async fn execute(
     execution_date: &str,
     api_url: &str,
@@ -283,7 +283,7 @@ async fn execute(
 
     let mut file = std::fs::File::create(format!("result_{}_{}_impact.csv", report, auth_sid))?;
     match CsvWriter::new(&mut file).finish(&mut sql_df){
-        Ok(()) => info!("result_{}_{}_impact.csv", report, auth_sid),
+        Ok(()) => info!("success write result_{}_{}_impact.csv", report, auth_sid),
         Err(e) => error!("error writing result_{}_{}_impact.csv\n Message:{:?}",report,auth_sid,e),
     }
 
@@ -307,6 +307,7 @@ async fn execute(
     campaign
 }
 
+#[tracing::instrument(err)]
 async fn exec_report(key: &str, report: &str) -> Result<(), Box<dyn std::error::Error>> {
     let mut parameters: String = String::new();
     let campaign: HashMap<&str, Vec<&str>> = setup_campaigns();
@@ -349,6 +350,7 @@ async fn exec_report(key: &str, report: &str) -> Result<(), Box<dyn std::error::
     Ok(())
 }
 
+#[tracing::instrument(err)]
 pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
     let campaign: Vec<&str> = setup_campaigns().keys().cloned().collect();
     let campaign2 = campaign.clone();

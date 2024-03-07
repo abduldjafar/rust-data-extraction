@@ -19,7 +19,7 @@ struct JobDetail {
     year: String,
 }
 
-#[tracing::instrument]
+#[tracing::instrument(err)]
 pub async fn fetch_sync(
     api_url: &str,
     api_endpoint: &str,
@@ -40,6 +40,7 @@ pub async fn fetch_sync(
     Ok(json)
 }
 
+#[tracing::instrument(err)]
 pub async fn extraction(
     table: &str,
     api_url: &str,
@@ -78,6 +79,7 @@ pub async fn extraction(
     Ok(())
 }
 
+#[tracing::instrument(err)]
 pub async fn execute(
     table: &str,
     at_type: &str,
@@ -154,6 +156,7 @@ pub async fn execute(
     Ok(())
 }
 
+#[tracing::instrument(err)]
 pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
     let years = vec!["2024".to_string(), "2023".to_string(), "2022".to_string()];
 
