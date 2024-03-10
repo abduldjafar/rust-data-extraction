@@ -3,7 +3,6 @@ mod job;
 use std::env;
 use clap::Parser;
 use chrono::Local;
-use job::job::{run_task, Airtable, EmarsysBq, Impact, AtJobDetail};
 use tokio::try_join;
 
 #[derive(Parser, Debug)]
@@ -28,17 +27,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env::set_var("PIPELINE_CONFIG", args.pipeline_config);
     env::set_var("CURRENT_DATE", current_date);
 
-    let airtable = Airtable{
-        job_details: AtJobDetail::new(),
-    };
-    let emarsys_bq = EmarsysBq;
-    let impact = Impact;
-
-
+    // Run tasks in parallel using async closures
     let result = try_join!(
-        run_task(&airtable),
-        //run_task(&emarsys_bq),
-        //run_task(&impact)
+        job::airtable::run(),
+        job::impact::run(),
+        job::emarsys_bq::run()
     );
 
     // Handle the result of parallel tasks
