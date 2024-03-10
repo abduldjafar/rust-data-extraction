@@ -1,12 +1,12 @@
 use tracing::{error, info};
 
 #[derive(Clone, Debug)]
-pub struct Airtable{
+pub struct Airtable {
     pub job_details: AtJobDetail,
 }
 
 #[derive(Clone, Debug)]
-pub struct  EmarsysBq{
+pub struct EmarsysBq {
     pub table_name: String,
 }
 
@@ -24,8 +24,7 @@ pub struct AtJobDetail {
 }
 
 impl AtJobDetail {
-    
-    pub fn new() -> Self { 
+    pub fn new() -> Self {
         AtJobDetail {
             airtables_type: String::from(""),
             airtable_endpoint: String::from(""),
@@ -37,15 +36,13 @@ impl AtJobDetail {
     }
 }
 
-
 pub trait Tasks {
-    
-    async fn fetch_sync(&mut self) -> Result<(), Box<dyn std::error::Error>> ;
-    async fn extraction(&mut self) -> Result<(), Box<dyn std::error::Error>> ;
+    async fn fetch_sync(&mut self) -> Result<(), Box<dyn std::error::Error>>;
+    async fn extraction(&mut self) -> Result<(), Box<dyn std::error::Error>>;
     async fn execute(&mut self) -> Result<(), Box<dyn std::error::Error>>;
     async fn run(&self) -> Result<(), Box<dyn std::error::Error>>;
 }
 
-pub async fn run_task(task: &impl Tasks) -> Result<(), Box<dyn std::error::Error>>{
+pub async fn run_task(task: &impl Tasks) -> Result<(), Box<dyn std::error::Error>> {
     task.run().await
 }
