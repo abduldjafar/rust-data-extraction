@@ -1,5 +1,5 @@
-use std::{collections::HashMap, time::Duration};
 use serde_json::Value;
+use std::{collections::HashMap, time::Duration};
 
 pub fn update_nested_value(
     nested_map: &mut HashMap<String, Value>,
@@ -23,7 +23,10 @@ pub async fn at_fetch_sync(
     auth_token: &str,
     offset_value: &str,
 ) -> Result<serde_json::Value, reqwest::Error> {
-    let url = format!("{}/{}/?pageSize=100&offset={}", api_url, api_endpoint, offset_value);
+    let url = format!(
+        "{}/{}/?pageSize=100&offset={}",
+        api_url, api_endpoint, offset_value
+    );
 
     let client = reqwest::Client::new();
     let resp = client
