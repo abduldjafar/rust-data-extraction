@@ -6,7 +6,9 @@ pub struct Airtable{
 }
 
 #[derive(Clone, Debug)]
-pub struct  EmarsysBq;
+pub struct  EmarsysBq{
+    pub table_name: String,
+}
 
 #[derive(Clone, Debug)]
 pub struct Impact;

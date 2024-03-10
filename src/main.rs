@@ -31,13 +31,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let airtable = Airtable{
         job_details: AtJobDetail::new(),
     };
-    let emarsys_bq = EmarsysBq;
+    let emarsys_bq = EmarsysBq{
+        table_name: String::new(),
+    };
     let impact = Impact;
 
 
     let result = try_join!(
         run_task(&airtable),
-        //run_task(&emarsys_bq),
+        run_task(&emarsys_bq),
         //run_task(&impact)
     );
 

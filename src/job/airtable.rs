@@ -150,6 +150,7 @@ impl Tasks for Airtable {
             "result_{}_{}.csv",
             self.job_details.airtable_endpoint, self.job_details.year
         ))?;
+        
         match CsvWriter::new(&mut file).finish(&mut final_df.collect()?) {
             Ok(_) => info!("success write table {}", self.job_details.airtable_endpoint),
             Err(e) => error!(
