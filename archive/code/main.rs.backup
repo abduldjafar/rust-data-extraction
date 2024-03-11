@@ -1,8 +1,8 @@
 mod job;
-use chrono::Local;
-use clap::Parser;
-use job::job::{run_task, Airtable, AtJobDetail, EmarsysBq, Impact};
+
 use std::env;
+use clap::Parser;
+use chrono::Local;
 use tokio::try_join;
 
 #[derive(Parser, Debug)]
@@ -15,9 +15,10 @@ struct Args {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+
     // install global collector configured based on RUST_LOG env var.
     tracing_subscriber::fmt::init();
-
+    
     // Parse command-line arguments
     let args = Args::parse();
 
@@ -26,27 +27,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env::set_var("PIPELINE_CONFIG", args.pipeline_config);
     env::set_var("CURRENT_DATE", current_date);
 
-    let airtable = Airtable {
-        job_details: AtJobDetail::new(),
-    };
-    let emarsys_bq = EmarsysBq {
-        table_name: String::new(),
-    };
-    let impact = Impact {
-        execution_date: String::new(),
-        api_url: String::new(),
-        report: String::new(),
-        parameters: String::new(),
-        auth_sid: String::new(),
-        auth_token: String::new(),
-        sub_account_name: String::new(),
-        key: String::new(),
-    };
-
+    // Run tasks in parallel using async closures
     let result = try_join!(
-        run_task(&airtable),
-        run_task(&emarsys_bq),
-        run_task(&impact)
+        job::airtable::run(),
+        job::impact::run(),
+        job::emarsys_bq::run()
     );
 
     // Handle the result of parallel tasks
