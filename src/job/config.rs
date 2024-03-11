@@ -1,16 +1,9 @@
-use serde::Deserialize;
 use serde_json::{self, Value};
 use std::collections::HashMap;
 use std::env;
 use std::fs::File;
 use std::fs::{self};
 use std::io::Read;
-
-#[derive(Deserialize)]
-struct SourceTable {
-    name: &'static str,
-    path: String,
-}
 
 pub fn at_filtered_columns(
     table: &str,
@@ -178,19 +171,25 @@ pub fn setup_emarsys_sources_tables() -> HashMap<&'static str, String> {
     result
 }
 
-pub async fn setup_emarsys_columns() -> Result<HashMap<String, String>,Box<dyn std::error::Error>> {
+pub async fn setup_emarsys_columns() -> Result<HashMap<String, String>, Box<dyn std::error::Error>>
+{
     let config = get_config().await?;
-    let contents =
-        fs::read_to_string(&config["emarsys_bq_columns"].as_str().unwrap()).expect("Could not read the file");
+    let contents = fs::read_to_string(&config["emarsys_bq_columns"].as_str().unwrap())
+        .expect("Could not read the file");
 
-    let datalake_emarsys: HashMap<String, String> = serde_json::from_str::<HashMap<String, Value>>(&contents)
-        .expect("Failed to parse JSON")
-        .iter()
-        .map(|(k, v)| (k.clone(), v.as_str().expect("Failed to convert value to str").to_string()))
-        .collect();
-
-    
+    let datalake_emarsys: HashMap<String, String> =
+        serde_json::from_str::<HashMap<String, Value>>(&contents)
+            .expect("Failed to parse JSON")
+            .iter()
+            .map(|(k, v)| {
+                (
+                    k.clone(),
+                    v.as_str()
+                        .expect("Failed to convert value to str")
+                        .to_string(),
+                )
+            })
+            .collect();
 
     Ok(datalake_emarsys)
 }
-

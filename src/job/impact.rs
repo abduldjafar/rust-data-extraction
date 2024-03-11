@@ -6,11 +6,11 @@ use super::{
 use crate::job::job::Tasks;
 use polars::prelude::*;
 use polars_sql::SQLContext;
+use std::fs;
 use std::fs::File;
 use std::{collections::HashMap, env, io::Write, time::Duration as DurationStd};
 use tokio::time::timeout;
 use tracing::{error, info};
-use std::fs;
 
 impl Tasks for Impact {
     #[tracing::instrument(err)]
@@ -46,7 +46,7 @@ impl Tasks for Impact {
         Ok(())
     }
 
-    #[tracing::instrument(err,skip_all)]
+    #[tracing::instrument(err, skip_all)]
     async fn execute(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let campaign: HashMap<&str, Vec<&str>> = setup_campaigns();
         self.sub_account_name = campaign[self.key.as_str()][1].to_string();
@@ -103,14 +103,14 @@ impl Tasks for Impact {
                 df.clone().lazy(),
             );
 
-            let full_path = format!("{}/{}.sql",query_path,report);
+            let full_path = format!("{}/{}.sql", query_path, report);
             let query_template = fs::read_to_string(full_path).unwrap_or_else(|_| String::new());
             let query = format!(
-                    "{}",
-                    query_template
-                        .replace("{sub_account_name}", &self.sub_account_name)
-                        .replace("{auth_sid}", auth_sid)
-                        .replace("{report}", report)
+                "{}",
+                query_template
+                    .replace("{sub_account_name}", &self.sub_account_name)
+                    .replace("{auth_sid}", auth_sid)
+                    .replace("{report}", report)
             );
 
             sql_df = ctx.execute(query.as_str()).unwrap().collect().unwrap();

@@ -1,8 +1,7 @@
-use serde_json::Value;
-use std::{collections::HashMap, time::Duration as DurationStd};
 use chrono::{Datelike, Duration, NaiveDate};
+use serde_json::Value;
 use std::str::FromStr;
-
+use std::{collections::HashMap, time::Duration as DurationStd};
 
 pub fn update_nested_value(
     nested_map: &mut HashMap<String, Value>,
@@ -62,12 +61,8 @@ pub async fn impact_fetch_sync(
 
     if tdy_month != tmr_month {
         let date_90_days_ago = load_date - Duration::days(90);
-        window_start_date = NaiveDate::from_ymd_opt(
-            date_90_days_ago.year(),
-            date_90_days_ago.month(),
-            1,
-        )
-        .unwrap();
+        window_start_date =
+            NaiveDate::from_ymd_opt(date_90_days_ago.year(), date_90_days_ago.month(), 1).unwrap();
     } else {
         window_start_date = NaiveDate::from_str(execution_date)? - Duration::days(3);
     }
