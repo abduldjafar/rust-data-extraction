@@ -1,9 +1,16 @@
+use serde::Deserialize;
 use serde_json::{self, Value};
 use std::collections::HashMap;
 use std::env;
 use std::fs::File;
 use std::fs::{self};
 use std::io::Read;
+
+#[derive(Deserialize)]
+struct SourceTable {
+    name: &'static str,
+    path: String,
+}
 
 pub fn at_filtered_columns(
     table: &str,
@@ -171,66 +178,19 @@ pub fn setup_emarsys_sources_tables() -> HashMap<&'static str, String> {
     result
 }
 
-pub fn setup_emarsys_columns() -> HashMap<&'static str, &'static str> {
-    let datalake_emarsys: HashMap<&str, &str> = [
-        ("emarsys_campaign", "
-            campaign_id,campaign_name,created_at,deleted,fromemail,fromname,subject,email_category
-        "),
-        ("emarsys_email_bounces", "
-            contact_id,launch_id,domain,email_sent_at,campaign_type,bounce_type,campaign_id,message_id,event_time,customer_id,partitiontime,loaded_at,dsn_reason
-        "),
-        ("emarsys_email_campaign_categories", "
-            id,name,event_time,customer_id,partitiontime,loaded_at
-        "),
-        ("emarsys_email_campaigns", "
-            id,name,version_name,language,category_id,parent_campaign_id,type,sub_type,program_id,customer_id,partitiontime,event_time,loaded_at
-        "),
-        ("emarsys_email_campaigns_v2", "
-            campaign_id,origin_campaign_id,is_recurring,name,timezone,version_name,language,program_id,program_version_id,suite_type,suite_event,campaign_type,defined_type,category_name,event_time,customer_id,partitiontime,loaded_at,subject
-        "),
-        ("emarsys_email_cancels", "
-            contact_id,launch_id,reason,campaign_type,suite_type,suite_event,campaign_id,message_id,event_time,customer_id,partitiontime,loaded_at
-        "),
-        ("emarsys_email_clicks", "
-            contact_id,launch_id,domain,email_sent_at,campaign_type,geo,platform,md5,is_mobile,is_anonymized,uid,ip,user_agent,section_id,link_id,category_id,is_img,campaign_id,message_id,event_time,customer_id,partitiontime,loaded_at,category_name,link_name,'' as temp_column,relative_link_id
-        "),
-        ("emarsys_email_complaints", "
-            contact_id,launch_id,domain,email_sent_at,campaign_type,campaign_id,message_id,event_time,customer_id,loaded_at,partitiontime
-        "),
-        ("emarsys_email_opens", "
-            contact_id,launch_id,domain,email_sent_at,campaign_type,geo,platform,md5,is_mobile,is_anonymized,uid,ip,user_agent,generated_from,campaign_id,message_id,event_time,customer_id,partitiontime,loaded_at
-        "),
-        ("emarsys_email_sends", "
-            contact_id,launch_id,campaign_type,domain,campaign_id,message_id,event_time,customer_id,partitiontime,loaded_at
-        "),
-        ("emarsys_email_unsubscribes", "
-            contact_id,launch_id,domain,email_sent_at,campaign_type,source,campaign_id,message_id,event_time,customer_id,loaded_at,partitiontime
-        "),
-        ("emarsys_normalized_reg_form_view", "
-            contact_id,customer_id,subscriber_id,contact_form,contact_source,opt_in,store_opt_in,registration_date,form_name
-        "),
-        ("emarsys_prof_forms", "
-            bit_position,form_name
-        "),
-        ("emarsys_session_categories", "
-            user_id,user_id_type,user_id_field_id,contact_id,category,event_time,customer_id,partitiontime,loaded_at
-        "),
-        ("emarsys_session_purchases", "
-            user_id,user_id_type,user_id_field_id,contact_id,items,order_id,event_time,customer_id,partitiontime,loaded_at
-        "),
-        ("emarsys_session_views", "
-            user_id,user_id_type,user_id_field_id,contact_id,item_id,event_time,customer_id,partitiontime,loaded_at
-        "),
-        ("emarsys_sessions", "
-            start_time,end_time,purchases,views,tags,categories,last_cart,user_id,user_id_type,user_id_field_id,contact_id,currency,customer_id,partitiontime,loaded_at
-        "),
-        ("emarsys_suite_contact_0", "
-            contact_id,customer_id,subscriber_id,contact_form,contact_source,opt_in,store_opt_in,registration_date
-        "),
-    ]
-    .iter()
-    .cloned()
-    .collect();
+pub async fn setup_emarsys_columns() -> Result<HashMap<String, String>,Box<dyn std::error::Error>> {
+    let config = get_config().await?;
+    let contents =
+        fs::read_to_string(&config["emarsys_bq_columns"].as_str().unwrap()).expect("Could not read the file");
 
-    datalake_emarsys
+    let datalake_emarsys: HashMap<String, String> = serde_json::from_str::<HashMap<String, Value>>(&contents)
+        .expect("Failed to parse JSON")
+        .iter()
+        .map(|(k, v)| (k.clone(), v.as_str().expect("Failed to convert value to str").to_string()))
+        .collect();
+
+    
+
+    Ok(datalake_emarsys)
 }
+

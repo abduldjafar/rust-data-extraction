@@ -32,15 +32,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let emarsys_bq = EmarsysBq {
         table_name: String::new(),
     };
-    let impact = Impact{ 
-        execution_date: String::new(), 
+    let impact = Impact {
+        execution_date: String::new(),
         api_url: String::new(),
-         report: String::new(), 
-         parameters: String::new(),
-          auth_sid: String::new(), 
-          auth_token: String::new(), 
-          sub_account_name: String::new() 
-        
+        report: String::new(),
+        parameters: String::new(),
+        auth_sid: String::new(),
+        auth_token: String::new(),
+        sub_account_name: String::new(),
+        key: String::new(),
     };
 
     let result = try_join!(

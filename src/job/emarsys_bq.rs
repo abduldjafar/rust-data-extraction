@@ -20,7 +20,7 @@ impl Tasks for EmarsysBq {
     #[tracing::instrument(err)]
     async fn extraction(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let sources_tables = setup_emarsys_sources_tables();
-        let datalake_emarsys = setup_emarsys_columns();
+        let datalake_emarsys = setup_emarsys_columns().await?;
 
         let columns = datalake_emarsys.get(self.table_name.as_str()).unwrap();
         let source_table = sources_tables.get(self.table_name.as_str()).unwrap();

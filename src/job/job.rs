@@ -18,6 +18,7 @@ pub struct Impact{
     pub auth_sid: String, 
     pub auth_token: String,
     pub sub_account_name: String,
+    pub key: String,
 }
 
 #[derive(Clone, Debug)]

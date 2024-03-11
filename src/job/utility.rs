@@ -44,7 +44,7 @@ pub async fn at_fetch_sync(
 }
 
 #[tracing::instrument(err)]
-async fn impact_fetch_sync(
+pub async fn impact_fetch_sync(
     execution_date: &str,
     api_url: &str,
     report: &str,

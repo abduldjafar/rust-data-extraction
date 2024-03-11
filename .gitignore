@@ -19,3 +19,5 @@ Cargo.lock
 /*.json
 /*.csv
 /*.yml
+src/config/impact
+src/config/emarsys
