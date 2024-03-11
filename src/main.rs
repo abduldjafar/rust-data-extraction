@@ -32,12 +32,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let emarsys_bq = EmarsysBq {
         table_name: String::new(),
     };
-    let impact = Impact;
+    let impact = Impact{ 
+        execution_date: String::new(), 
+        api_url: String::new(),
+         report: String::new(), 
+         parameters: String::new(),
+          auth_sid: String::new(), 
+          auth_token: String::new(), 
+          sub_account_name: String::new() 
+        
+    };
 
     let result = try_join!(
         run_task(&airtable),
         run_task(&emarsys_bq),
-        //run_task(&impact)
+        run_task(&impact)
     );
 
     // Handle the result of parallel tasks

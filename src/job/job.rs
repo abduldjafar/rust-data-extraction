@@ -1,4 +1,3 @@
-use tracing::{error, info};
 
 #[derive(Clone, Debug)]
 pub struct Airtable {
@@ -11,7 +10,15 @@ pub struct EmarsysBq {
 }
 
 #[derive(Clone, Debug)]
-pub struct Impact;
+pub struct Impact{
+    pub execution_date: String, 
+    pub api_url: String, 
+    pub report: String, 
+    pub parameters: String,
+    pub auth_sid: String, 
+    pub auth_token: String,
+    pub sub_account_name: String,
+}
 
 #[derive(Clone, Debug)]
 pub struct AtJobDetail {
