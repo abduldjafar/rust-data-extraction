@@ -88,7 +88,7 @@ impl Tasks for EmarsysBq {
 
     #[tracing::instrument(err)]
     async fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let sources_tables_hashmap= setup_emarsys_sources_tables().await?;
+        let sources_tables_hashmap = setup_emarsys_sources_tables().await?;
         let sources_tables: Vec<String> = sources_tables_hashmap.keys().into_vec();
 
         let handles: Vec<_> = sources_tables

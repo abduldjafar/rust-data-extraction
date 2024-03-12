@@ -37,7 +37,8 @@ pub async fn get_config() -> Result<Value, serde_yaml::Error> {
     config
 }
 
-pub async fn setup_emarsys_sources_tables() -> Result<HashMap<String, String>, Box<dyn std::error::Error>> {
+pub async fn setup_emarsys_sources_tables(
+) -> Result<HashMap<String, String>, Box<dyn std::error::Error>> {
     let config = get_config().await?;
     let emarsys_google_project = config["emarsys_google_project"].as_str().unwrap();
     let emarsys_src_dataset = &config["emarsys_src_dataset"].as_str().unwrap();
@@ -86,8 +87,7 @@ pub async fn setup_emarsys_columns() -> Result<HashMap<String, String>, Box<dyn 
                     k.clone(),
                     v.as_str()
                         .expect("Failed to convert value to str")
-                        .to_string()
-                        
+                        .to_string(),
                 )
             })
             .collect();
