@@ -30,7 +30,7 @@ impl Tasks for Impact {
             &self.auth_token,
         )
         .await?;
-
+        
         let datas = data.get("Records").unwrap().as_array().unwrap();
         for d in datas {
             serde_json::to_writer(&mut file, &d)?;
@@ -48,7 +48,7 @@ impl Tasks for Impact {
 
     #[tracing::instrument(err, skip_all)]
     async fn execute(&mut self) -> Result<(), Box<dyn std::error::Error>> {
-        let campaign: HashMap<&str, Vec<&str>> = setup_campaigns();
+        let campaign: HashMap<String, Vec<String>> = setup_campaigns().await?;
         self.sub_account_name = campaign[self.key.as_str()][1].to_string();
 
         let config = get_config().await?;
@@ -132,13 +132,13 @@ impl Tasks for Impact {
 
     #[tracing::instrument(err)]
     async fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let campaign: Vec<&str> = utility::setup_campaigns().keys().cloned().collect();
+        let campaign: Vec<String> = utility::setup_campaigns().await?.keys().cloned().collect();
 
         let handles: Vec<_> = campaign
             .into_iter()
             .map(|key| {
                 let mut impact_clone = self.clone();
-                impact_clone.key = key.to_string();
+                impact_clone.key = key;
                 tokio::spawn(async move {
                     if let Err(err) =
                         timeout(DurationStd::from_secs(3600), impact_clone.execute()).await

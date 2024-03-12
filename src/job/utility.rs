@@ -1,7 +1,10 @@
 use chrono::{Datelike, Duration, NaiveDate};
 use serde_json::Value;
+use std::fs;
 use std::str::FromStr;
 use std::{collections::HashMap, time::Duration as DurationStd};
+
+use super::config::get_config;
 
 pub fn update_nested_value(
     nested_map: &mut HashMap<String, Value>,
@@ -96,19 +99,26 @@ pub async fn impact_fetch_sync(
     Ok(json)
 }
 
-pub fn setup_campaigns() -> HashMap<&'static str, Vec<&'static str>> {
-    let campaign: HashMap<&str, Vec<&str>> = [
-        ("11593", vec!["SGD", "LOVEBONITO MALAYSIA SDN BHD"]),
-        ("15035", vec!["USD", "LOVEBONITO HONG KONG"]),
-        ("14986", vec!["JPY", "LOVEBONITO JAPAN"]),
-        ("15036", vec!["SGD", "LOVEBONITO SINGAPORE"]),
-        ("11588", vec!["SGD", "LOVEBONITO INTERNATIONAL"]),
-        ("17302", vec!["IDR", "LOVEBONITO INDONESIA"]),
-        ("18304", vec!["USD", "LOVEBONITO USA LLC"]),
-    ]
-    .iter()
-    .cloned()
-    .collect();
 
-    campaign
+pub async fn setup_campaigns() -> Result<HashMap<String, Vec<String>> ,Box<dyn std::error::Error>>{
+    let config = get_config().await?;
+
+    let contents = fs::read_to_string(&config["impact_campaigns_path"].as_str().unwrap())
+        .expect("Could not read the file");
+
+    let campaigns: HashMap<String,  Vec<String>> =
+        serde_json::from_str::<HashMap<String, Value>>(&contents)
+            .expect("Failed to parse JSON")
+            .iter()
+            .map(|(k, v)| {
+                (
+                    k.clone(),
+                    v.as_array().unwrap().clone().into_iter().map(
+                        |x| x.to_string()
+                    ).collect()
+                )
+            })
+            .collect();
+
+    Ok(campaigns)
 }
