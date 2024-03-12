@@ -7,6 +7,7 @@ use google_cloud_bigquery::{
     http::job::query::QueryRequest,
     query::row::Row,
 };
+use polars::prelude::IntoVec;
 use std::time::Duration as DurationStd;
 use tokio::time::timeout;
 use tracing::{error, info};
@@ -19,7 +20,7 @@ impl Tasks for EmarsysBq {
 
     #[tracing::instrument(err)]
     async fn extraction(&mut self) -> Result<(), Box<dyn std::error::Error>> {
-        let sources_tables = setup_emarsys_sources_tables();
+        let sources_tables = setup_emarsys_sources_tables().await?;
         let datalake_emarsys = setup_emarsys_columns().await?;
 
         let columns = datalake_emarsys.get(self.table_name.as_str()).unwrap();
@@ -87,7 +88,8 @@ impl Tasks for EmarsysBq {
 
     #[tracing::instrument(err)]
     async fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let sources_tables: Vec<&str> = setup_emarsys_sources_tables().keys().copied().collect();
+        let sources_tables_hashmap = setup_emarsys_sources_tables().await?;
+        let sources_tables: Vec<String> = sources_tables_hashmap.keys().into_vec();
 
         let handles: Vec<_> = sources_tables
             .into_iter()

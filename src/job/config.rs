@@ -37,143 +37,44 @@ pub async fn get_config() -> Result<Value, serde_yaml::Error> {
     config
 }
 
-pub fn setup_emarsys_sources_tables() -> HashMap<&'static str, String> {
+pub async fn setup_emarsys_sources_tables(
+) -> Result<HashMap<String, String>, Box<dyn std::error::Error>> {
+    let config = get_config().await?;
+    let emarsys_google_project = config["emarsys_google_project"].as_str().unwrap();
+    let emarsys_src_dataset = &config["emarsys_src_dataset"].as_str().unwrap();
     let execution_date = env::var("CURRENT_DATE").expect("$PIPELINE_CONFIG is not set");
-    let emarsys_google_project = "ems-od-lovebonito";
-    let src_dataset = "emarsys_lovebonito_794867401";
+
     let sql_filter = format!(
         "where date(loaded_at, \"Asia/Singapore\") = \"{}\"",
         execution_date
     );
+    let contents = fs::read_to_string(&config["emarsys_bq_sources"].as_str().unwrap())
+        .expect("Could not read the file");
 
-    let result: HashMap<&str, String> = [
-        (
-            "emarsys_normalized_reg_form_view",
-            format!(
-                "{}.editable_dataset.normalized_reg_form_view",
-                emarsys_google_project
-            ),
-        ),
-        (
-            "emarsys_prof_forms",
-            format!("{}.editable_dataset.prof_forms", emarsys_google_project),
-        ),
-        (
-            "emarsys_suite_contact_0",
-            format!(
-                "{}.editable_dataset.suite_contact_0",
-                emarsys_google_project
-            ),
-        ),
-        (
-            "emarsys_email_bounces",
-            format!(
-                "{}.{}.email_bounces_794867401 {}",
-                emarsys_google_project, src_dataset, sql_filter
-            ),
-        ),
-        (
-            "emarsys_email_campaign_categories",
-            format!(
-                "{}.{}.email_campaign_categories_794867401",
-                emarsys_google_project, src_dataset
-            ),
-        ),
-        (
-            "emarsys_email_campaigns",
-            format!(
-                "{}.{}.email_campaigns_794867401 {}",
-                emarsys_google_project, src_dataset, sql_filter
-            ),
-        ),
-        (
-            "emarsys_email_campaigns_v2",
-            format!(
-                "{}.{}.email_campaigns_v2_794867401 {}",
-                emarsys_google_project, src_dataset, sql_filter
-            ),
-        ),
-        (
-            "emarsys_email_cancels",
-            format!(
-                "{}.{}.email_cancels_794867401 {}",
-                emarsys_google_project, src_dataset, sql_filter
-            ),
-        ),
-        (
-            "emarsys_email_clicks",
-            format!(
-                "{}.{}.email_clicks_794867401 {}",
-                emarsys_google_project, src_dataset, sql_filter
-            ),
-        ),
-        (
-            "emarsys_email_complaints",
-            format!(
-                "{}.{}.email_complaints_794867401 {}",
-                emarsys_google_project, src_dataset, sql_filter
-            ),
-        ),
-        (
-            "emarsys_email_opens",
-            format!(
-                "{}.{}.email_opens_794867401 {}",
-                emarsys_google_project, src_dataset, sql_filter
-            ),
-        ),
-        (
-            "emarsys_email_sends",
-            format!(
-                "{}.{}.email_sends_794867401 {}",
-                emarsys_google_project, src_dataset, sql_filter
-            ),
-        ),
-        (
-            "emarsys_email_unsubscribes",
-            format!(
-                "{}.{}.email_unsubscribes_794867401 {}",
-                emarsys_google_project, src_dataset, sql_filter
-            ),
-        ),
-        (
-            "emarsys_session_categories",
-            format!(
-                "{}.{}.session_categories_794867401 {}",
-                emarsys_google_project, src_dataset, sql_filter
-            ),
-        ),
-        (
-            "emarsys_session_purchases",
-            format!(
-                "{}.{}.session_purchases_794867401 {}",
-                emarsys_google_project, src_dataset, sql_filter
-            ),
-        ),
-        (
-            "emarsys_session_views",
-            format!(
-                "{}.{}.session_views_794867401 {}",
-                emarsys_google_project, src_dataset, sql_filter
-            ),
-        ),
-        (
-            "emarsys_sessions",
-            format!(
-                "{}.{}.sessions_794867401 {}",
-                emarsys_google_project, src_dataset, sql_filter
-            ),
-        ),
-    ]
-    .iter()
-    .cloned()
-    .collect();
+    let emarsys_data_sources: HashMap<String, String> =
+        serde_json::from_str::<HashMap<String, Value>>(&contents)
+            .expect("Failed to parse JSON")
+            .iter()
+            .map(|(k, v)| {
+                (
+                    k.clone(),
+                    v.as_str()
+                        .expect("Failed to convert value to str")
+                        .to_string()
+                        .replace("{EMARSYS_GOOGLE_PROJECT}", emarsys_google_project)
+                        .replace("{SRC_DATASET}", emarsys_src_dataset)
+                        .replace("{SQL_FILTER}", sql_filter.as_str()),
+                )
+            })
+            .collect();
 
-    result
+    Ok(emarsys_data_sources)
 }
 
 pub async fn setup_emarsys_columns() -> Result<HashMap<String, String>, Box<dyn std::error::Error>>
 {
     let config = get_config().await?;
+
     let contents = fs::read_to_string(&config["emarsys_bq_columns"].as_str().unwrap())
         .expect("Could not read the file");
 
