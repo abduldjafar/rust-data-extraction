@@ -14,6 +14,7 @@ use super::{
 };
 use crate::job::job::Tasks;
 
+
 impl Tasks for Airtable {
     #[tracing::instrument(err)]
     async fn fetch_sync(&mut self) -> Result<(), Box<dyn std::error::Error>> {
