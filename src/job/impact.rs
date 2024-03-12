@@ -82,9 +82,9 @@ impl Tasks for Impact {
 
         for s in strings {
             let mut impact_extraction = self.clone();
-            impact_extraction.api_url = api_url.to_string();
-            impact_extraction.auth_token = auth_token.to_string();
-            impact_extraction.execution_date = execution_date.to_string();
+            impact_extraction.api_url = api_url.to_string().replace("\"", "");
+            impact_extraction.auth_token = auth_token.to_string().replace("\"", "");
+            impact_extraction.execution_date = execution_date.to_string().replace("\"", "");
             let parameters = if s == "adv_action_listing_pm_only" {
                 format!(
                         "&subaid={}&CONV_CURRENCY={}&SHOW_DATE=1&SHOW_GROUP=1&SHOW_ACTION_BATCH_DATE=1&SHOW_ACTION_BATCH_ID=1&SHOW_AD=1&SHOW_AD_PLACEMENT=1&SHOW_AD_POSITION=1&SHOW_AD_RANK=1&SHOW_BONUS_COST=1&SHOW_BUSINESS_REGION=1&SHOW_MP_BUSINESS_REGION=1&SHOW_ACTION_CATEGORY=1&SHOW_SUBCATEGORY=1&SHOW_CLIENT_COST=1&SHOW_CHANNEL=1&SHOW_PROPERTY_ID=1&SHOW_PROPERTY_NAME=1&SHOW_USER_AGENT2=1&SHOW_ACTUAL_CLEARING_DATE=1&SHOW_GEO_LOCATION=1&SHOW_LOCATION_NAME=1&SHOW_CLICK_TO_ACTION=1&SHOW_LOCATION_ID=1&SHOW_LOCATION_TYPE=1&SHOW_MP_VALUE1=1&SHOW_MP_VALUE2=1&SHOW_MP_VALUE3=1&SHOW_PROPERTY_TYPE=1&SHOW_TEXT3=1&SHOW_TEXT2=1&SHOW_TEXT1=1&SHOW_STATUS_DETAIL=1&SHOW_REFERRING_URL=1&SHOW_RELATIONSHIP=1&SHOW_SCHEDULED_CLEARING_DATE=1&SHOW_SHIPPING=1&SHOW_SITE_CATEGORY=1&SHOW_SITE_VERSION=1&SHOW_PARAM1=1&SHOW_PARAM2=1&SHOW_PARAM3=1&SHOW_MP__PROPERTY=1&SHOW_REFERRAL_TRAFFIC_SOURCE=1&SHOW_REFERRAL_TRAFFIC_TYPE=1&SHOW_REFERRAL_TYPE=1&SHOW_NOTES=1&SHOW_PROMO_DESCRIPTION=1&SHOW_ORIGINAL_PAYOUT2=1&SHOW_ORIGINAL_SALEAMOUNT=1&SHOW_PAYMENT_TYPE=1&SHOW_POST_CODE=1&SHOW_PROPERTY=1&SHOW_REBATE=1&SHOW_REDIRECT_RULE_ID=1&SHOW_REDIRECT_RULE=1&SHOW_REFERRAL_DATE=1&SHOW_MODIFICATION_REASON=1&SHOW_MONEY1=1&SHOW_MONEY2=1&SHOW_MONEY3=1&SHOW_NUMERIC1=1&SHOW_NUMERIC2=1&SHOW_NUMERIC3=1&SHOW_DISPOSITION=1&SHOW_HEAR_ABOUT=1&SHOW_LANDING_PAGE=1&SHOW_LINE_BUSINESS=1&SHOW_MP_LINE_BUSINESS=1&SHOW_MODIFICATION_DATE=1&SHOW_LOCKING_DATE=1&SHOW_SUBTOTAL=1&SHOW_ADV_CUST_REGION=1&SHOW_CUST_COUNTRY=1&SHOW_ADV_CUST_CITY=1&SHOW_CUST_EMAIL=1&SHOW_CUSTOMER_ID=1&SHOW_CUSTOMER_STATUS=1&SHOW_CUSTDATE2=1&SHOW_CUSTDATE1=1&SHOW_CUSTDATE3=1&SHOW_DISCOUNT=1&SHOW_IO=1&SHOW_CURRENCY_CONV=1&SUPERSTATUS_MS=APPROVED&SUPERSTATUS_MS=NA&SUPERSTATUS_MS=PENDING&SUPERSTATUS_MS=REVERSED",
@@ -95,9 +95,9 @@ impl Tasks for Impact {
                         "&subaid={}&ADV_CAMPAIGN=0&INITIATED_BY=0&RECIPIENT_ACCOUNT_ID=0&PARTNER_RADIUS_SOLR=0&MP_GROUP_ADV=0",self.key
                     )
             };
-            impact_extraction.parameters = parameters;
-            impact_extraction.report = s.to_string();
-            impact_extraction.auth_sid = auth_sid.to_string();
+            impact_extraction.parameters = parameters.replace("\"", "");
+            impact_extraction.report = s.to_string().replace("\"", "");
+            impact_extraction.auth_sid = auth_sid.to_string().replace("\"", "");
 
             impact_extraction.extraction().await?;
 

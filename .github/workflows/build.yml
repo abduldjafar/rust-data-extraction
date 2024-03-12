@@ -3,7 +3,7 @@ name: Build Rust Binary
 on:
   push:
     branches:
-      - main
+      - staging
 
 jobs:
   build:
