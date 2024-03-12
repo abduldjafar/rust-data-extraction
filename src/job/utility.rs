@@ -100,25 +100,3 @@ pub async fn impact_fetch_sync(
 }
 
 
-pub async fn setup_campaigns() -> Result<HashMap<String, Vec<String>> ,Box<dyn std::error::Error>>{
-    let config = get_config().await?;
-
-    let contents = fs::read_to_string(&config["impact_campaigns_path"].as_str().unwrap())
-        .expect("Could not read the file");
-
-    let campaigns: HashMap<String,  Vec<String>> =
-        serde_json::from_str::<HashMap<String, Value>>(&contents)
-            .expect("Failed to parse JSON")
-            .iter()
-            .map(|(k, v)| {
-                (
-                    k.clone(),
-                    v.as_array().unwrap().clone().into_iter().map(
-                        |x| x.to_string()
-                    ).collect()
-                )
-            })
-            .collect();
-
-    Ok(campaigns)
-}

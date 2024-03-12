@@ -1,7 +1,7 @@
 use super::{
-    config::get_config,
+    config::{ get_config, setup_campaigns},
     job::Impact,
-    utility::{self, setup_campaigns},
+    utility,
 };
 use crate::job::job::Tasks;
 use polars::prelude::*;
@@ -132,7 +132,7 @@ impl Tasks for Impact {
 
     #[tracing::instrument(err)]
     async fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let campaign: Vec<String> = utility::setup_campaigns().await?.keys().cloned().collect();
+        let campaign: Vec<String> = setup_campaigns().await?.keys().cloned().collect();
 
         let handles: Vec<_> = campaign
             .into_iter()
