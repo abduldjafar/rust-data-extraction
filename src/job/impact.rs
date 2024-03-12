@@ -1,5 +1,5 @@
 use super::{
-    config::{ get_config, setup_campaigns},
+    config::{get_config, setup_campaigns},
     job::Impact,
     utility,
 };
@@ -18,7 +18,7 @@ impl Tasks for Impact {
         todo!()
     }
 
-    #[tracing::instrument(err)]
+    #[tracing::instrument(err,skip_all)]
     async fn extraction(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let mut file = File::create(format!("{}_{}_impact.json", self.report, self.auth_sid))?;
         let data = utility::impact_fetch_sync(
@@ -30,17 +30,26 @@ impl Tasks for Impact {
             &self.auth_token,
         )
         .await?;
-        
-        let datas = data.get("Records").unwrap().as_array().unwrap();
-        for d in datas {
-            serde_json::to_writer(&mut file, &d)?;
-            match writeln!(&mut file) {
-                Ok(()) => continue,
-                Err(err) => error!(
-                    "error write json data into {}_{}_impact.json\nMessage: {:?}",
-                    self.report, self.auth_sid, err
-                ),
-            } // Add a newline after each value
+
+        let datas = data.get("Records");
+
+        match datas {
+            Some(data) => {
+                let arr_data = data.as_array().unwrap();
+                for d in arr_data {
+                    serde_json::to_writer(&mut file, &d)?;
+                    match writeln!(&mut file) {
+                        Ok(()) => continue,
+                        Err(err) => error!(
+                            "error write json data into {}_{}_impact.json\nMessage: {:?}",
+                            self.report, self.auth_sid, err
+                        ),
+                    }
+                }
+            }
+            None => {
+                error!("impact empty data with error: :{:?}",data)
+            }
         }
 
         Ok(())
