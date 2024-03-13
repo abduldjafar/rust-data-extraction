@@ -2,7 +2,7 @@ use super::job::{AtJobDetail, Impact, RestApi};
 use chrono::Datelike;
 use chrono::Duration;
 use chrono::NaiveDate;
-use std::{collections::HashMap, str::FromStr, time::Duration as DurationStd};
+use std::{str::FromStr, time::Duration as DurationStd};
 
 impl RestApi for AtJobDetail {
     async fn fetch_sync(&mut self) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
