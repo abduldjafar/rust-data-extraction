@@ -28,6 +28,7 @@ pub struct AtJobDetail {
     pub api_endpoint: String,
     pub airtable_url: String,
     pub auth_token: String,
+    pub offset_value: String,
 }
 
 impl AtJobDetail {
@@ -39,15 +40,20 @@ impl AtJobDetail {
             api_endpoint: String::from(""),
             airtable_url: String::from(""),
             auth_token: String::from(""),
+            offset_value: String::from("")
+            
         }
     }
 }
 
 pub trait Tasks {
-    async fn fetch_sync(&mut self) -> Result<(), Box<dyn std::error::Error>>;
     async fn extraction(&mut self) -> Result<(), Box<dyn std::error::Error>>;
     async fn execute(&mut self) -> Result<(), Box<dyn std::error::Error>>;
     async fn run(&self) -> Result<(), Box<dyn std::error::Error>>;
+}
+
+pub trait RestApi {
+    async fn fetch_sync(&mut self) -> Result<serde_json::Value, Box<dyn std::error::Error>>;
 }
 
 pub async fn run_task(task: &impl Tasks) -> Result<(), Box<dyn std::error::Error>> {

@@ -7,6 +7,7 @@ use std::time::Duration;
 use tokio::time::timeout;
 use tracing::{error, info};
 
+use super::job::RestApi;
 use super::utility;
 use super::{
     config::get_config,
@@ -16,11 +17,6 @@ use crate::job::job::Tasks;
 
 impl Tasks for Airtable {
     #[tracing::instrument(err)]
-    async fn fetch_sync(&mut self) -> Result<(), Box<dyn std::error::Error>> {
-        todo!()
-    }
-
-    #[tracing::instrument(err)]
     async fn extraction(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let mut file = File::create(format!(
             "{}_output_{}.json",
@@ -28,15 +24,11 @@ impl Tasks for Airtable {
         ))?;
 
         let mut offset_clone = "".to_string();
-
+        
         loop {
-            let response = utility::at_fetch_sync(
-                &self.job_details.airtable_url,
-                &self.job_details.api_endpoint,
-                &self.job_details.auth_token,
-                offset_clone.as_str(),
-            )
-            .await?;
+
+            self.job_details.offset_value =offset_clone;
+            let response = self.job_details.fetch_sync().await?;
 
             let data = response.get("records").unwrap().as_array().unwrap();
             for d in data {
@@ -187,6 +179,7 @@ impl Tasks for Airtable {
                                 api_endpoint: "".to_string(),
                                 airtable_url: "".to_string(),
                                 auth_token: "".to_string(),
+                                offset_value: "".to_string(),
                             };
                             job_details.push(details);
                         }

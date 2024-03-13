@@ -1,6 +1,6 @@
 use super::{
     config::{get_config, setup_campaigns},
-    job::Impact,
+    job::{Impact, RestApi},
     utility,
 };
 use crate::job::job::Tasks;
@@ -13,23 +13,10 @@ use tokio::time::timeout;
 use tracing::{error, info};
 
 impl Tasks for Impact {
-    #[tracing::instrument(err)]
-    async fn fetch_sync(&mut self) -> Result<(), Box<dyn std::error::Error>> {
-        todo!()
-    }
-
     #[tracing::instrument(err,skip_all)]
     async fn extraction(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let mut file = File::create(format!("{}_{}_impact.json", self.report, self.auth_sid))?;
-        let data = utility::impact_fetch_sync(
-            &self.execution_date,
-            &self.api_url,
-            &self.report,
-            &self.parameters,
-            &self.auth_sid,
-            &self.auth_token,
-        )
-        .await?;
+        let data = self.fetch_sync().await?;
 
         let datas = data.get("Records");
 
