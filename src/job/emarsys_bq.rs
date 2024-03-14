@@ -1,6 +1,6 @@
 use super::job::EmarsysBq;
 use crate::job::config::{setup_emarsys_columns, setup_emarsys_sources_tables};
-use crate::job::job::Tasks;
+use crate::job::job::{upload_file, AwsS3, Tasks};
 use csv;
 use google_cloud_bigquery::{
     client::{Client, ClientConfig},
@@ -74,7 +74,12 @@ impl Tasks for EmarsysBq {
         }
 
         match writer.flush() {
-            Ok(()) => info!("success write table  : {}", self.table_name.as_str()),
+            Ok(()) => {
+                info!("success write table  : {}", self.table_name.as_str());
+                upload_file( &mut AwsS3{ config: todo!(), client: todo!(), bucket_name: todo!() }
+                    
+                , format!("{}.csv", self.table_name.as_str())).await?;
+            },
             Err(err) => error!("error write into {} {:?}", self.table_name.as_str(), err),
         }
 
