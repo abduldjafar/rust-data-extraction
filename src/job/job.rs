@@ -1,8 +1,6 @@
-use std::env;
-
 use aws_config::{meta::region::RegionProviderChain, SdkConfig};
 use aws_sdk_s3::Client;
-use google_cloud_bigquery::storage;
+use std::env;
 
 use super::config::get_config;
 
@@ -38,14 +36,15 @@ pub struct AtJobDetail {
     pub auth_token: String,
 }
 
+#[derive(Clone, Debug)]
 pub struct AwsS3 {
-    pub config: SdkConfig,
-    pub client: Client,
-    pub bucket_name: String,
+    pub config: Option<SdkConfig>,
+    pub client: Option<Client>,
+    pub bucket_name: Option<String>,
 }
 
 impl AwsS3 {
-    pub async fn new(&self) -> Result<Self, Box<dyn std::error::Error>> {
+    pub async fn new(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let yaml_config = get_config().await?;
 
         env::set_var(
@@ -58,7 +57,6 @@ impl AwsS3 {
         );
         env::set_var("AWS_REGION", &yaml_config["aws_region"].as_str().unwrap());
 
-        // install global collector configured based on RUST_LOG env var.
         let region_provider = RegionProviderChain::default_provider();
         let config = aws_config::defaults(aws_config::BehaviorVersion::latest())
             .region(region_provider)
@@ -67,9 +65,11 @@ impl AwsS3 {
         let client = Client::new(&config);
         let bucket_name = yaml_config["bucket_name"].as_str().unwrap().to_string();
 
-        Ok(AwsS3 { config,client,bucket_name })
-    }
+        self.client = Some(client);
+        self.bucket_name = Some(bucket_name);
 
+        Ok(())
+    }
 }
 
 impl AtJobDetail {
@@ -86,22 +86,31 @@ impl AtJobDetail {
 }
 
 pub trait Tasks {
-    async fn fetch_sync(&mut self) -> Result<(), Box<dyn std::error::Error>>;
-    async fn extraction(&mut self) -> Result<(), Box<dyn std::error::Error>>;
+    async fn fetch_sync(&self) -> Result<(), Box<dyn std::error::Error>>;
+    async fn extraction(&self) -> Result<(), Box<dyn std::error::Error>>;
     async fn execute(&mut self) -> Result<(), Box<dyn std::error::Error>>;
     async fn run(&self) -> Result<(), Box<dyn std::error::Error>>;
 }
 
 pub trait Storage {
     async fn init(&mut self) -> Result<(), Box<dyn std::error::Error>>;
-    async fn upload(&mut self,filename: String) -> Result<(), Box<dyn std::error::Error>>;
+    async fn upload(&self, filename: String) -> Result<(), Box<dyn std::error::Error>>;
+}
+
+pub struct StoragePlatform;
+
+impl StoragePlatform {
+    // Write should be used but we kept it as String to ignore error handling
+    pub async fn upload<T: Storage>(
+        mut storage: T,
+        filename: String,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        storage.init().await?;
+        storage.upload(filename).await?;
+        Ok(())
+    }
 }
 
 pub async fn run_task(task: &impl Tasks) -> Result<(), Box<dyn std::error::Error>> {
     task.run().await
-}
-
-pub async fn upload_file(storage: &mut impl Storage,filename: String) -> Result<(), Box<dyn std::error::Error>> {
-    storage.init().await?;
-    storage.upload(filename).await
 }

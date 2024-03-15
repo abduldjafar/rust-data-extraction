@@ -6,20 +6,18 @@ use super::job::{AwsS3, Storage};
 
 impl Storage for AwsS3 {
     async fn init(&mut self) -> Result<(), Box<dyn std::error::Error>> {
-        let config = self.new().await?;
-
-        self.config = config.config;
-        self.client = config.client;
-        self.bucket_name = config.bucket_name;
+        self.new().await?;
 
         Ok(())
     }
 
-    async fn upload(&mut self, file_name: String) -> Result<(), Box<dyn std::error::Error>> {
+    async fn upload(&self, file_name: String) -> Result<(), Box<dyn std::error::Error>> {
         let body = ByteStream::from_path(Path::new(&file_name)).await;
-        self.client
+        let client = self.client.as_ref().unwrap();
+        let bucket_name = self.bucket_name.as_ref().unwrap();
+        client
             .put_object()
-            .bucket(self.bucket_name.clone())
+            .bucket(bucket_name)
             .key(file_name)
             .body(body.unwrap())
             .send()

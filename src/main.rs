@@ -1,7 +1,7 @@
 mod job;
 use chrono::Local;
 use clap::Parser;
-use job::job::{run_task, Airtable, AtJobDetail, EmarsysBq, Impact};
+use job::job::{run_task, Airtable, AtJobDetail, AwsS3, EmarsysBq, Impact};
 use std::env;
 use tokio::try_join;
 
@@ -30,7 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         job_details: AtJobDetail::new(),
     };
     let emarsys_bq = EmarsysBq {
-        table_name: String::new(),
+        table_name: String::new()
     };
     let impact = Impact {
         execution_date: String::new(),

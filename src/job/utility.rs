@@ -1,10 +1,7 @@
 use chrono::{Datelike, Duration, NaiveDate};
 use serde_json::Value;
-use std::fs;
 use std::str::FromStr;
 use std::{collections::HashMap, time::Duration as DurationStd};
-
-use super::config::get_config;
 
 pub fn update_nested_value(
     nested_map: &mut HashMap<String, Value>,

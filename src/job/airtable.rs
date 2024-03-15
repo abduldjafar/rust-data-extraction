@@ -12,16 +12,16 @@ use super::{
     config::get_config,
     job::{Airtable, AtJobDetail},
 };
-use crate::job::job::Tasks;
+use crate::job::job::{AwsS3, StoragePlatform, Tasks};
 
 impl Tasks for Airtable {
     #[tracing::instrument(err)]
-    async fn fetch_sync(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+    async fn fetch_sync(&self) -> Result<(), Box<dyn std::error::Error>> {
         todo!()
     }
 
     #[tracing::instrument(err)]
-    async fn extraction(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+    async fn extraction(&self) -> Result<(), Box<dyn std::error::Error>> {
         let mut file = File::create(format!(
             "{}_output_{}.json",
             self.job_details.airtable_endpoint, self.job_details.year
@@ -146,13 +146,25 @@ impl Tasks for Airtable {
 
         let final_df = new_df.with_columns(new_columns).select(final_columns);
 
-        let mut file = std::fs::File::create(format!(
+        let file_name = format!(
             "result_{}_{}.csv",
             self.job_details.airtable_endpoint, self.job_details.year
-        ))?;
+        );
+        let mut file = std::fs::File::create(&file_name)?;
 
         match CsvWriter::new(&mut file).finish(&mut final_df.collect()?) {
-            Ok(_) => info!("success write table {}", self.job_details.airtable_endpoint),
+            Ok(_) => {
+                info!("success write table {}", self.job_details.airtable_endpoint);
+                StoragePlatform::upload(
+                    AwsS3 {
+                        config: None,
+                        client: None,
+                        bucket_name: None,
+                    },
+                    file_name,
+                )
+                .await?
+            }
             Err(e) => error!(
                 "error writing table {}\nMessage: {:?}",
                 self.job_details.airtable_endpoint, e

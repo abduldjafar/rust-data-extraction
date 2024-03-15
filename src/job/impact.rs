@@ -3,7 +3,7 @@ use super::{
     job::Impact,
     utility,
 };
-use crate::job::job::Tasks;
+use crate::job::job::{AwsS3, StoragePlatform, Tasks};
 use polars::prelude::*;
 use polars_sql::SQLContext;
 use std::fs;
@@ -14,12 +14,12 @@ use tracing::{error, info};
 
 impl Tasks for Impact {
     #[tracing::instrument(err)]
-    async fn fetch_sync(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+    async fn fetch_sync(&self) -> Result<(), Box<dyn std::error::Error>> {
         todo!()
     }
 
-    #[tracing::instrument(err,skip_all)]
-    async fn extraction(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+    #[tracing::instrument(err, skip_all)]
+    async fn extraction(&self) -> Result<(), Box<dyn std::error::Error>> {
         let mut file = File::create(format!("{}_{}_impact.json", self.report, self.auth_sid))?;
         let data = utility::impact_fetch_sync(
             &self.execution_date,
@@ -48,7 +48,7 @@ impl Tasks for Impact {
                 }
             }
             None => {
-                error!("impact empty data with error: :{:?}",data)
+                error!("impact empty data with error: :{:?}", data)
             }
         }
 
@@ -124,11 +124,22 @@ impl Tasks for Impact {
 
             sql_df = ctx.execute(query.as_str()).unwrap().collect().unwrap();
 
-            let mut file =
-                std::fs::File::create(format!("result_{}_{}_impact.csv", report, auth_sid))?;
+            let file_name = format!("result_{}_{}_impact.csv", report, auth_sid);
+            let mut file = std::fs::File::create(&file_name)?;
 
             match CsvWriter::new(&mut file).finish(&mut sql_df) {
-                Ok(()) => info!("success write result_{}_{}_impact.csv", report, auth_sid),
+                Ok(()) => {
+                    info!("success write result_{}_{}_impact.csv", report, auth_sid);
+                    StoragePlatform::upload(
+                        AwsS3 {
+                            config: None,
+                            client: None,
+                            bucket_name: None,
+                        },
+                        file_name,
+                    )
+                    .await?;
+                }
                 Err(e) => error!(
                     "error writing result_{}_{}_impact.csv\n Message:{:?}",
                     report, auth_sid, e

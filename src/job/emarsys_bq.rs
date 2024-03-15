@@ -1,6 +1,6 @@
 use super::job::EmarsysBq;
 use crate::job::config::{setup_emarsys_columns, setup_emarsys_sources_tables};
-use crate::job::job::{upload_file, AwsS3, Tasks};
+use crate::job::job::{AwsS3, StoragePlatform, Tasks};
 use csv;
 use google_cloud_bigquery::{
     client::{Client, ClientConfig},
@@ -14,12 +14,12 @@ use tracing::{error, info};
 
 impl Tasks for EmarsysBq {
     #[tracing::instrument(err)]
-    async fn fetch_sync(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+    async fn fetch_sync(&self) -> Result<(), Box<dyn std::error::Error>> {
         Ok(())
     }
 
     #[tracing::instrument(err)]
-    async fn extraction(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+    async fn extraction(&self) -> Result<(), Box<dyn std::error::Error>> {
         let sources_tables = setup_emarsys_sources_tables().await?;
         let datalake_emarsys = setup_emarsys_columns().await?;
 
@@ -45,7 +45,9 @@ impl Tasks for EmarsysBq {
         let mut iter: google_cloud_bigquery::query::Iterator<Row> =
             client.query(&project_id.unwrap(), request).await?;
 
-        let mut writer = csv::Writer::from_path(format!("{}.csv", self.table_name.as_str()))?;
+        let file_name = format!("{}.csv", self.table_name.as_str());
+
+        let mut writer = csv::Writer::from_path(&file_name)?;
 
         let vect_col: Vec<_> = datalake_emarsys
             .get(self.table_name.as_str())
@@ -76,10 +78,16 @@ impl Tasks for EmarsysBq {
         match writer.flush() {
             Ok(()) => {
                 info!("success write table  : {}", self.table_name.as_str());
-                upload_file( &mut AwsS3{ config: todo!(), client: todo!(), bucket_name: todo!() }
-                    
-                , format!("{}.csv", self.table_name.as_str())).await?;
-            },
+                StoragePlatform::upload(
+                    AwsS3 {
+                        config: None,
+                        client: None,
+                        bucket_name: None,
+                    },
+                    file_name,
+                )
+                .await?;
+            }
             Err(err) => error!("error write into {} {:?}", self.table_name.as_str(), err),
         }
 
