@@ -14,12 +14,7 @@ use tracing::{error, info};
 
 impl Tasks for EmarsysBq {
     #[tracing::instrument(err)]
-    async fn fetch_sync(&self) -> Result<(), Box<dyn std::error::Error>> {
-        Ok(())
-    }
-
-    #[tracing::instrument(err)]
-    async fn extraction(&self) -> Result<(), Box<dyn std::error::Error>> {
+    async fn extraction(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let sources_tables = setup_emarsys_sources_tables().await?;
         let datalake_emarsys = setup_emarsys_columns().await?;
 

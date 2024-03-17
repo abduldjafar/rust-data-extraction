@@ -4,6 +4,23 @@ use std::env;
 
 use super::config::get_config;
 
+pub trait Tasks {
+    async fn extraction(&mut self) -> Result<(), Box<dyn std::error::Error>>;
+    async fn execute(&mut self) -> Result<(), Box<dyn std::error::Error>>;
+    async fn run(&self) -> Result<(), Box<dyn std::error::Error>>;
+}
+
+pub trait Storage {
+    async fn init(&mut self) -> Result<(), Box<dyn std::error::Error>>;
+    async fn upload(&self, filename: String) -> Result<(), Box<dyn std::error::Error>>;
+}
+
+pub trait RestApi {
+    async fn fetch_sync(&mut self) -> Result<serde_json::Value, Box<dyn std::error::Error>>;
+}
+
+pub struct StoragePlatform;
+
 #[derive(Clone, Debug)]
 pub struct Airtable {
     pub job_details: AtJobDetail,
@@ -34,6 +51,7 @@ pub struct AtJobDetail {
     pub api_endpoint: String,
     pub airtable_url: String,
     pub auth_token: String,
+    pub offset_value: String,
 }
 
 #[derive(Clone, Debug)]
@@ -81,26 +99,12 @@ impl AtJobDetail {
             api_endpoint: String::from(""),
             airtable_url: String::from(""),
             auth_token: String::from(""),
+            offset_value: String::from(""),
         }
     }
 }
 
-pub trait Tasks {
-    async fn fetch_sync(&self) -> Result<(), Box<dyn std::error::Error>>;
-    async fn extraction(&self) -> Result<(), Box<dyn std::error::Error>>;
-    async fn execute(&mut self) -> Result<(), Box<dyn std::error::Error>>;
-    async fn run(&self) -> Result<(), Box<dyn std::error::Error>>;
-}
-
-pub trait Storage {
-    async fn init(&mut self) -> Result<(), Box<dyn std::error::Error>>;
-    async fn upload(&self, filename: String) -> Result<(), Box<dyn std::error::Error>>;
-}
-
-pub struct StoragePlatform;
-
 impl StoragePlatform {
-    // Write should be used but we kept it as String to ignore error handling
     pub async fn upload<T: Storage>(
         mut storage: T,
         filename: String,
