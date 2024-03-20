@@ -1,3 +1,4 @@
+use std::time::Instant;
 use polars::lazy::dsl::{col, lit, Expr};
 use polars::prelude::*;
 use std::collections::HashSet;
@@ -16,20 +17,25 @@ use super::{
 use crate::job::job::{AwsS3, StoragePlatform, Tasks};
 
 impl Tasks for Airtable {
-    #[tracing::instrument(err)]
+    #[tracing::instrument(err,skip_all)]
     async fn extraction(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        
+
+        let mut offset_clone = "".to_string();
+        let start_time = Instant::now();
         let mut file = File::create(format!(
             "{}_output_{}.json",
             self.job_details.airtable_endpoint, self.job_details.year
         ))?;
 
-        let mut offset_clone = "".to_string();
-
         loop {
+
+            info!("extracting data from airtabele");
             self.job_details.offset_value = offset_clone;
             let response = self.job_details.fetch_sync().await?;
 
             let data = response.get("records").unwrap().as_array().unwrap();
+
             for d in data {
                 serde_json::to_writer(&mut file, &d)?;
                 match writeln!(&mut file) {
@@ -41,6 +47,8 @@ impl Tasks for Airtable {
                 }
             }
 
+
+
             offset_clone = match response.get("offset").cloned() {
                 Some(row) => row.as_str().unwrap().to_string(),
                 None => "None".to_string(),
@@ -51,10 +59,16 @@ impl Tasks for Airtable {
             }
         }
 
+        let end_time = Instant::now();
+        let duration = end_time - start_time;
+        let duration_minutes = duration.as_secs() as f64 / 60.0;
+
+        info!("Done extracting All data from airtable in {:.2} minutes",duration_minutes);
+
         Ok(())
     }
 
-    #[tracing::instrument(err)]
+    #[tracing::instrument(err,skip_all)]
     async fn execute(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let config = get_config().await?;
 
@@ -145,7 +159,7 @@ impl Tasks for Airtable {
 
         match CsvWriter::new(&mut file).finish(&mut final_df.collect()?) {
             Ok(_) => {
-                info!("success write table {}", self.job_details.airtable_endpoint);
+                info!("success write table {} with year {}", self.job_details.airtable_endpoint,self.job_details.year);
                 StoragePlatform::upload(
                     AwsS3 {
                         config: None,
@@ -167,9 +181,16 @@ impl Tasks for Airtable {
 
     #[tracing::instrument(err)]
     async fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let years = vec!["2024".to_string(), "2023".to_string(), "2022".to_string()];
+        let years = vec![
+            //"2024".to_string(), 
+            "2023".to_string(),
+            //"2022".to_string()
+            ];
 
-        let airtables_types = vec!["product".to_string(), "launch".to_string()];
+        let airtables_types = vec![
+            "product".to_string(), 
+            "launch".to_string()
+        ];
 
         let endpoints = vec![
             ("launch", vec!["order_sheet"]),
