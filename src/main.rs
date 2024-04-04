@@ -41,8 +41,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let result = try_join!(
         run_task(&airtable),
-        //run_task(&emarsys_bq),
-        //run_task(&impact)
+        run_task(&emarsys_bq),
+        run_task(&impact)
     );
 
     match result {
