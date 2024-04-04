@@ -1,7 +1,7 @@
 mod job;
 use chrono::Local;
 use clap::Parser;
-use job::job::{run_task, Airtable, AtJobDetail, AwsS3, EmarsysBq, Impact};
+use job::job::{run_task, Airtable, AtJobDetail, EmarsysBq, Impact};
 use std::env;
 use tokio::try_join;
 
